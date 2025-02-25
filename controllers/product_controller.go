@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"go-pos/config"
+	"go-pos/exceptions"
 	"go-pos/models"
 	"net/http"
 )
@@ -11,10 +12,7 @@ func CreateProduct(c *gin.Context) {
 	var Product models.Product
 
 	if err := c.ShouldBindJSON(&Product); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Bad Request",
-			"err":     err.Error(),
-		})
+		exceptions.BadRequestException(c, err.Error)
 
 		return
 	}
@@ -22,10 +20,7 @@ func CreateProduct(c *gin.Context) {
 	create := config.Connection().Create(&Product)
 
 	if create.Error != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Product is not created",
-			"err":     create.Error,
-		})
+		exceptions.InternalServerErrorException(c, create.Error)
 
 		return
 	}
@@ -39,6 +34,13 @@ func CreateProduct(c *gin.Context) {
 func GetProductList(c *gin.Context) {
 	var Product models.Product
 
+	getData := config.Connection().Find(&Product)
+	if getData.Error != nil {
+		exceptions.InternalServerErrorException(c, getData.Error)
+
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"data": &Product,
 	})
@@ -49,9 +51,9 @@ func GetProductDetail(c *gin.Context) {
 	id := c.Param("id")
 
 	if config.Connection().First(&Product, id).Error != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Record not found",
-		})
+		exceptions.NotFoundException(c)
+
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -64,16 +66,13 @@ func UpdateProduct(c *gin.Context) {
 	id := c.Param("id")
 
 	if config.Connection().First(&Product, id).Error != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Record not found",
-		})
+		exceptions.NotFoundException(c)
+
+		return
 	}
 
 	if err := c.ShouldBindJSON(&Product); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Bad Request",
-			"err":     err.Error(),
-		})
+		exceptions.BadRequestException(c, err.Error)
 
 		return
 	}
@@ -81,10 +80,7 @@ func UpdateProduct(c *gin.Context) {
 	update := config.Connection().Updates(&Product)
 
 	if update.Error != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Product is not updated",
-			"err":     update.Error,
-		})
+		exceptions.InternalServerErrorException(c, update.Error)
 
 		return
 	}
@@ -100,18 +96,15 @@ func DeleteProduct(c *gin.Context) {
 	id := c.Param("id")
 
 	if config.Connection().First(&Product, id).Error != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Record not found",
-		})
+		exceptions.NotFoundException(c)
+
+		return
 	}
 
 	remove := config.Connection().Delete(&Product)
 
 	if remove.Error != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Product is not deleted",
-			"err":     remove.Error,
-		})
+		exceptions.InternalServerErrorException(c, remove.Error)
 
 		return
 	}
