@@ -16,5 +16,14 @@ func SetupRoutes() *gin.Engine {
 		product.DELETE("/:id", controllers.DeleteProduct)
 	}
 
+	user := r.Group("/users")
+	{
+		user.POST("", controllers.CreateUser)
+		user.GET("", controllers.GetUserList)
+		user.GET("/:id", controllers.GetUserDetail)
+		user.PUT("/:id", controllers.UpdateUser)
+		user.DELETE("/:id", controllers.DeleteUser)
+	}
+
 	return r
 }
