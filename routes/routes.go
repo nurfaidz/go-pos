@@ -7,6 +7,12 @@ import (
 
 func SetupRoutes() *gin.Engine {
 	r := gin.Default()
+
+	auth := r.Group("/auth")
+	{
+		auth.POST("/login", controllers.Login)
+	}
+
 	product := r.Group("/products")
 	{
 		product.POST("", controllers.CreateProduct)
