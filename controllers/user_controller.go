@@ -11,9 +11,8 @@ import (
 func GetUserList(c *gin.Context) {
 	var User models.User
 
-	getData := config.Connection().Find(&User)
-	if getData.Error != nil {
-		exceptions.InternalServerErrorException(c, getData.Error)
+	if err := config.Connection().Find(&User).Error; err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
 
 		return
 	}
@@ -49,14 +48,13 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&User); err != nil {
-		exceptions.BadRequestException(c, err.Error)
+		exceptions.BadRequestException(c, err.Error())
 
 		return
 	}
 
-	updateData := config.Connection().Updates(&User)
-	if updateData.Error != nil {
-		exceptions.InternalServerErrorException(c, updateData.Error)
+	if err := config.Connection().Updates(&User).Error; err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
 
 		return
 	}
@@ -78,9 +76,8 @@ func CreateUser(c *gin.Context) {
 
 	User.Password = "admin123"
 
-	createData := config.Connection().Create(&User)
-	if createData.Error != nil {
-		exceptions.InternalServerErrorException(c, createData.Error)
+	if err := config.Connection().Create(&User).Error; err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
 
 		return
 	}
@@ -101,9 +98,8 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	deleteData := config.Connection().Delete(&User)
-	if deleteData.Error != nil {
-		exceptions.InternalServerErrorException(c, deleteData.Error)
+	if err := config.Connection().Delete(&User).Error; err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
 	}
 
 	c.JSON(http.StatusOK, gin.H{
