@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"go-pos/controllers"
+	"go-pos/middlewares"
 )
 
 func SetupRoutes() *gin.Engine {
@@ -15,6 +16,7 @@ func SetupRoutes() *gin.Engine {
 
 	product := r.Group("/products")
 	{
+		product.Use(middlewares.Authentication())
 		product.POST("", controllers.CreateProduct)
 		product.GET("", controllers.GetProductList)
 		product.GET("/:id", controllers.GetProductDetail)
@@ -24,6 +26,7 @@ func SetupRoutes() *gin.Engine {
 
 	user := r.Group("/users")
 	{
+		user.Use(middlewares.Authentication())
 		user.POST("", controllers.CreateUser)
 		user.GET("", controllers.GetUserList)
 		user.GET("/:id", controllers.GetUserDetail)
