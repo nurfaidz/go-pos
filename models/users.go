@@ -9,7 +9,7 @@ import (
 type User struct {
 	gorm.Model
 	Name     string `json:"name" gorm:"not null" valid:"required~Name is required"`
-	Username string `json:"username" gorm:"not null;uniqueIndex" valid:"required~Username is required,unique~Username is already taken"`
+	Username string `json:"username" gorm:"unique;not null;uniqueIndex" valid:"required~Username is required"`
 	Password string `gorm:"not null" valid:"required~Password is required,minstringlength(6)~Password must be at least 6 characters" json:"password"`
 }
 
