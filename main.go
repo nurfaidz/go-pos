@@ -14,6 +14,7 @@ func main() {
 	}
 
 	config.Connection()
+	config.RunSeeder()
 
 	err = routes.SetupRoutes().Run(":8080")
 	if err != nil {
