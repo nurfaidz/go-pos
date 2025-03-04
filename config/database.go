@@ -11,7 +11,7 @@ import (
 
 func Connection() *gorm.DB {
 	HOST := os.Getenv("HOST")
-	USERNAME := os.Getenv("USERNAME")
+	USERNAME := os.Getenv("DBUSER")
 	PASSWORD := os.Getenv("PASSWORD")
 	DBNAME := os.Getenv("DBNAME")
 	PORT := os.Getenv("PORT")
