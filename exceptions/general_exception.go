@@ -13,7 +13,7 @@ func NotFoundException(c *gin.Context) {
 
 func InternalServerErrorException[E any](c *gin.Context, err E) {
 	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-		"message": "Proses interrupted",
+		"message": "Process interrupted",
 		"err":     err,
 	})
 }

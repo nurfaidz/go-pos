@@ -12,15 +12,13 @@ func CreateProduct(c *gin.Context) {
 	var Product models.Product
 
 	if err := c.ShouldBindJSON(&Product); err != nil {
-		exceptions.BadRequestException(c, err.Error)
+		exceptions.BadRequestException(c, err.Error())
 
 		return
 	}
 
-	create := config.Connection().Create(&Product)
-
-	if create.Error != nil {
-		exceptions.InternalServerErrorException(c, create.Error)
+	if err := config.Connection().Create(&Product).Error; err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
 
 		return
 	}
@@ -34,9 +32,8 @@ func CreateProduct(c *gin.Context) {
 func GetProductList(c *gin.Context) {
 	var Product models.Product
 
-	getData := config.Connection().Find(&Product)
-	if getData.Error != nil {
-		exceptions.InternalServerErrorException(c, getData.Error)
+	if err := config.Connection().Find(&Product).Error; err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
 
 		return
 	}
@@ -72,15 +69,13 @@ func UpdateProduct(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&Product); err != nil {
-		exceptions.BadRequestException(c, err.Error)
+		exceptions.BadRequestException(c, err.Error())
 
 		return
 	}
 
-	update := config.Connection().Updates(&Product)
-
-	if update.Error != nil {
-		exceptions.InternalServerErrorException(c, update.Error)
+	if err := config.Connection().Updates(&Product).Error; err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
 
 		return
 	}
@@ -101,10 +96,8 @@ func DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	remove := config.Connection().Delete(&Product)
-
-	if remove.Error != nil {
-		exceptions.InternalServerErrorException(c, remove.Error)
+	if err := config.Connection().Delete(&Product).Error; err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
 
 		return
 	}
