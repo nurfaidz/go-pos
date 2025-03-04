@@ -33,5 +33,12 @@ func SetupRoutes() *gin.Engine {
 		user.DELETE("/:id", controllers.DeleteUser)
 	}
 
+	transaction := r.Group("/transactions")
+	{
+		transaction.POST("", controllers.CreateTransaction)
+		transaction.GET("", controllers.GetTransactionList)
+		transaction.GET("/:id", controllers.CreateTransaction)
+	}
+
 	return r
 }

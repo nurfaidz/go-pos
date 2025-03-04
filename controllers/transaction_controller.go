@@ -1,18 +1,20 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-pos/config"
 	"go-pos/exceptions"
 	"go-pos/models"
 	"net/http"
+	"time"
 )
 
 func GetTransactionList(c *gin.Context) {
 	var Transaction models.Transaction
 
-	if err := config.Connection().Find(&Transaction); err.Error != nil {
-		exceptions.InternalServerErrorException(c, err)
+	if err := config.Connection().Find(&Transaction).Error; err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
 
 		return
 	}
@@ -41,14 +43,23 @@ func CreateTransaction(c *gin.Context) {
 	var Transaction models.Transaction
 
 	if err := c.ShouldBindJSON(&Transaction); err != nil {
-		exceptions.BadRequestException(c, err.Error)
+		exceptions.BadRequestException(c, err.Error())
 
 		return
 	}
 
-	if err := config.Connection().Create(&Transaction); err.Error != nil {
-		exceptions.InternalServerErrorException(c, err.Error)
+	Transaction.Reference = fmt.Sprintf("TRX%d", time.Now().Unix())
+	c.JSON(http.StatusCreated, &Transaction)
+	return
 
-		return
-	}
+	//if err := config.Connection().Create(&Transaction).Error; err != nil {
+	//	exceptions.InternalServerErrorException(c, err.Error())
+	//
+	//	return
+	//}
+
+	//c.JSON(http.StatusCreated, gin.H{
+	//	"message": "Transaction created",
+	//	"data":    &Transaction,
+	//})
 }

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-pos/config"
 	"go-pos/exceptions"
@@ -74,7 +75,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	User.Password = "admin123"
+	User.Password = fmt.Sprintf("%s123", User.Username)
 
 	if err := config.Connection().Create(&User).Error; err != nil {
 		exceptions.InternalServerErrorException(c, err.Error())
