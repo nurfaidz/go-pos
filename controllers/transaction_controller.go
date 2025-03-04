@@ -6,6 +6,7 @@ import (
 	"go-pos/config"
 	"go-pos/exceptions"
 	"go-pos/models"
+	"gorm.io/gorm"
 	"net/http"
 	"time"
 )
@@ -41,7 +42,6 @@ func GetTransactionDetail(c *gin.Context) {
 
 func CreateTransaction(c *gin.Context) {
 	var Transaction models.Transaction
-	//var list models.TransactionList
 
 	if err := c.ShouldBindJSON(&Transaction); err != nil {
 		exceptions.BadRequestException(c, err.Error())
@@ -49,29 +49,65 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	err := config.Connection().Debug().Create(&Transaction.TransactionList).Error
+	db := config.Connection()
 
-	fmt.Println(err)
+	for i, item := range Transaction.TransactionList {
+		var Product models.Product
 
-	Transaction.Reference = fmt.Sprintf("TRX%d", time.Now().Unix())
+		if err := db.First(&Product, item.ProductID).Error; err != nil {
+			exceptions.InternalServerErrorException(c, err.Error())
 
-	var totalQuantity int
+			return
+		}
 
-	//for item := Transaction.TransactionList {
-	//	totalQuantity += item.Qty
-	//}
-	fmt.Println(totalQuantity)
+		Transaction.TransactionList[i].Amount = Product.Price
+		Transaction.TransactionList[i].Total = Transaction.TransactionList[i].Amount * item.Qty
+	}
 
-	Transaction.Qty = totalQuantity
-	c.JSON(http.StatusCreated, &Transaction)
-	//if err := config.Connection().Create(&Transaction).Error; err != nil {
-	//	exceptions.InternalServerErrorException(c, err.Error())
-	//
-	//	return
-	//}
-	//
-	//c.JSON(http.StatusCreated, gin.H{
-	//	"message": "Transaction created",
-	//	"data":    &Transaction,
-	//})
+	err := db.Transaction(func(tx *gorm.DB) error {
+		Transaction.Reference = fmt.Sprintf("TR%d", time.Now().Unix())
+
+		if err := tx.Create(&Transaction).Error; err != nil {
+			return err
+		}
+
+		var totalQty, totalAmount int
+
+		for i := range Transaction.TransactionList {
+			Transaction.TransactionList[i].ID = 0
+			Transaction.TransactionList[i].TransactionID = Transaction.ID
+
+			totalQty += Transaction.TransactionList[i].Qty
+			totalAmount += Transaction.TransactionList[i].Total
+		}
+
+		if err := tx.CreateInBatches(&Transaction.TransactionList, len(Transaction.TransactionList)).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Model(&Transaction).Updates(models.Transaction{
+			Qty:   totalQty,
+			Total: totalAmount,
+		}).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		exceptions.InternalServerErrorException(c, err.Error())
+
+		return
+	}
+
+	db.Preload("User").
+		Preload("TransactionList.Product").
+		First(&Transaction, Transaction.ID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Transaction created successfully",
+		"data":    &Transaction,
+	})
+
 }
