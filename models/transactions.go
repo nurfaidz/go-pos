@@ -8,6 +8,7 @@ type Transaction struct {
 	Qty             int               `json:"qty"`
 	Total           int               `json:"total"`
 	Buyer           string            `json:"buyer"`
-	UserId          uint              `json:"user_id"`
-	TransactionList []TransactionList `json:"transaction_list"`
+	UserID          uint              `json:"user_id"`
+	User            User              `gorm:"foreignKey:UserID"`
+	TransactionList []TransactionList `gorm:"foreignKey:TransactionID"`
 }
