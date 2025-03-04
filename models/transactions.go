@@ -10,5 +10,5 @@ type Transaction struct {
 	Buyer           string            `json:"buyer"`
 	UserID          uint              `json:"user_id"`
 	User            User              `gorm:"foreignKey:UserID"`
-	TransactionList []TransactionList `gorm:"foreignKey:TransactionID"`
+	TransactionList []TransactionList `gorm:"foreignKey:TransactionID" json:"transaction_list"`
 }

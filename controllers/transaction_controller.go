@@ -41,6 +41,7 @@ func GetTransactionDetail(c *gin.Context) {
 
 func CreateTransaction(c *gin.Context) {
 	var Transaction models.Transaction
+	//var list models.TransactionList
 
 	if err := c.ShouldBindJSON(&Transaction); err != nil {
 		exceptions.BadRequestException(c, err.Error())
@@ -48,16 +49,27 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	Transaction.Reference = fmt.Sprintf("TRX%d", time.Now().Unix())
-	c.JSON(http.StatusCreated, &Transaction)
-	return
+	err := config.Connection().Debug().Create(&Transaction.TransactionList).Error
 
+	fmt.Println(err)
+
+	Transaction.Reference = fmt.Sprintf("TRX%d", time.Now().Unix())
+
+	var totalQuantity int
+
+	//for item := Transaction.TransactionList {
+	//	totalQuantity += item.Qty
+	//}
+	fmt.Println(totalQuantity)
+
+	Transaction.Qty = totalQuantity
+	c.JSON(http.StatusCreated, &Transaction)
 	//if err := config.Connection().Create(&Transaction).Error; err != nil {
 	//	exceptions.InternalServerErrorException(c, err.Error())
 	//
 	//	return
 	//}
-
+	//
 	//c.JSON(http.StatusCreated, gin.H{
 	//	"message": "Transaction created",
 	//	"data":    &Transaction,
